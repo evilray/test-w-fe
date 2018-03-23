@@ -3,17 +3,28 @@
     <div class="container">
       <div class="form-group">
         <form @submit.prevent="addTask">
-        <input placeholder="What needs to be done?" class="form-control mb-1"
-               v-model="newTask">
-        <button class="btn btn-primary btn-block d-block d-lg-none"
-                :disabled="!newTask.trim()">Add
-        </button>
+          <input placeholder="What needs to be done?" class="form-control mb-1"
+                 v-model="newTask">
+          <button class="btn btn-primary btn-block d-block d-lg-none"
+                  :disabled="!newTask.trim()">Add
+          </button>
         </form>
       </div>
       <ul class="todo-list">
         <li class="todo-item" v-for="task in tasks">
-          <input class="todo-checkbox" type="checkbox"/>
-          <span>{{task.title}}</span>
+          <input class="todo-checkbox" type="checkbox">
+          <label class="todo-item-title"
+
+                 @click="editTask(task)">
+            <span v-if="task !== editingTask">{{task.title}}</span>
+            <input class="todo-edit-input form-control" type="text"
+                   v-focus
+                   v-model="task.title"
+                   v-if="task === editingTask"
+                   @blur="doneEdit(task)"
+                   @keyup.enter="doneEdit(task)"
+                   @keyup.esc="cancelEdit(task)">
+          </label>
           <span class="todo-item-remove" @click="removeTask(task)">✕</span>
         </li>
       </ul>
@@ -26,10 +37,18 @@
 
   export default {
     name: 'app',
+    directives: {
+      focus: {
+        inserted: function (el) {
+          el.focus()
+        }
+      }
+    },
     data() {
       return {
         tasks: [],
-        newTask: ''
+        newTask: '',
+        editingTask: null
       }
     },
     computed: {
@@ -75,7 +94,19 @@
         this.tasks.reverse();
       },
       editTask(task) {
-
+        this.beforeEditCache = task.title;
+        this.editingTask = task;
+      },
+      doneEdit(task) {
+        this.editingTask = null;
+        task.title = task.title.trim();
+        if (!task.title) {
+          this.removeTask(task);
+        }
+      },
+      cancelEdit(task) {
+        this.editedTodo = null;
+        task.title = this.beforeEditCache;
       },
       markTask(task) {
 
@@ -84,6 +115,7 @@
         this.tasks.splice(this.tasks.indexOf(task), 1);
       },
       saveTasks() {
+        console.log('SAVED');
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
       }
     }
@@ -104,25 +136,34 @@
   }
 
   .todo-item {
-    padding: 12px 30px 12px 45px;
+    padding: 0 35px 0 45px;
     position: relative;
     border-bottom: 1px solid #EEE;
-
-    cursor: pointer;
   }
 
   .todo-item:hover {
     background: #fffada;
   }
 
+  .todo-item-title {
+    cursor: pointer;
+    display: block;
+    padding: 12px 0 6px;
+  }
+
+  .todo-edit-input {
+    padding: 2px 6px;
+  }
+
   .todo-item-remove {
     display: block;
     position: absolute;
     padding: 5px 10px;
-    right: 0px;
+    right: 0;
     top: 7px;
     color: #FFF;
     transition: all .3s ease;
+    cursor: pointer;
   }
 
   .todo-item:hover .todo-item-remove {
