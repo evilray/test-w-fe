@@ -1,29 +1,35 @@
 <template>
   <div id="app">
-    <input class="form-control">
-    <ul class="todo-list">
-      <li class="todo-item" v-for="task in tasks">
-        <label class="todo-label">
+    <div class="container">
+      <div class="form-group">
+        <form @submit.prevent="addTask">
+        <input placeholder="What needs to be done?" class="form-control mb-1"
+               v-model="newTask">
+        <button class="btn btn-primary btn-block d-block d-lg-none"
+                :disabled="!newTask.trim()">Add
+        </button>
+        </form>
+      </div>
+      <ul class="todo-list">
+        <li class="todo-item" v-for="task in tasks">
           <input class="todo-checkbox" type="checkbox"/>
-        </label>
-        {{task.title}}
-      </li>
-    </ul>
+          <span>{{task.title}}</span>
+          <span class="todo-item-remove" @click="removeTask(task)">✕</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
-  let task = {
-    id: null,
-    title: 'sd',
-    completed: false
-  };
   const STORAGE_KEY = 'test-w-todo-list';
+
   export default {
     name: 'app',
     data() {
       return {
         tasks: [],
+        newTask: ''
       }
     },
     computed: {
@@ -36,7 +42,7 @@
     watch: {
       tasks: {
         handler: function () {
-          this.saveTasks()
+          this.saveTasks();
         },
         deep: true
       }
@@ -48,11 +54,25 @@
       fetchTasks() {
         this.tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       },
-      addTask(task) {
-
+      addTask() {
+        this.tasks.push({
+          title: this.newTask,
+          completed: false
+        });
+        this.sortTasks();
+        this.newTask = '';
       },
       sortTasks() {
-
+        this.tasks.sort(function (a, b) {
+          if (a.title > b.title) {
+            return 1;
+          }
+          if (a.title < b.title) {
+            return -1;
+          }
+          return 0;
+        });
+        this.tasks.reverse();
       },
       editTask(task) {
 
@@ -61,7 +81,7 @@
 
       },
       removeTask(task) {
-
+        this.tasks.splice(this.tasks.indexOf(task), 1);
       },
       saveTasks() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
@@ -79,13 +99,38 @@
 
   .todo-list {
     background: #FFF;
+    border-radius: 0.25rem;
+    border: 1px solid #EEE;
   }
 
   .todo-item {
-    padding: 0 0 0 40px;
+    padding: 12px 30px 12px 45px;
     position: relative;
     border-bottom: 1px solid #EEE;
-    line-height: 40px;
+
+    cursor: pointer;
+  }
+
+  .todo-item:hover {
+    background: #fffada;
+  }
+
+  .todo-item-remove {
+    display: block;
+    position: absolute;
+    padding: 5px 10px;
+    right: 0px;
+    top: 7px;
+    color: #FFF;
+    transition: all .3s ease;
+  }
+
+  .todo-item:hover .todo-item-remove {
+    color: #CC6666;
+  }
+
+  .todo-item:hover .todo-item-remove:hover {
+    color: #CC0000;
   }
 
   .todo-checkbox {
@@ -94,7 +139,7 @@
     appearance: none;
     width: 40px;
     height: 40px;
-    top: 0;
+    top: 5px;
     left: 0;
     outline: none;
     position: absolute;
@@ -104,7 +149,12 @@
   .todo-checkbox:after {
     content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
   }
+
   .todo-checkbox:checked:after {
     content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
+  }
+
+  .container {
+    margin-top: 40px;
   }
 </style>
