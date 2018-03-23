@@ -3,7 +3,8 @@
     <div class="container">
       <div class="form-group">
         <form @submit.prevent="addTask">
-          <input placeholder="What needs to be done?" class="form-control mb-1"
+          <input placeholder="What needs to be done?" class="form-control mb-1 todo-add-input"
+                 :class="{'large': !tasks.length}"
                  v-model="newTask">
           <button class="btn btn-primary btn-block d-block d-lg-none"
                   :disabled="!newTask.trim()">Add
@@ -30,6 +31,15 @@
           <span class="todo-item-remove" @click="removeTask(task)">✕</span>
         </li>
       </ul>
+      <div v-if="tasks.length" class="todo-actions d-flex justify-content-between">
+        <div>
+          <span v-if="remaining" class="todo-action-info tasks-count">{{ remaining }} {{ remaining | pluralize }} left</span>
+          <span v-else class="todo-action-info">All tasks completed!</span>
+        </div>
+        <div v-if="completed">
+          <button class="btn btn-link" @click="removeCompleted">Remove completed</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -54,10 +64,15 @@
       }
     },
     computed: {
-      totalTasks() {
-        if (this.tasks) {
-          return this.tasks.length;
-        }
+      remaining() {
+        return this.tasks.filter(function (task) {
+          return !task.completed;
+        }).length;
+      },
+      completed() {
+        return this.tasks.filter(function (task) {
+          return task.completed;
+        }).length;
       }
     },
     watch: {
@@ -70,6 +85,11 @@
     },
     created: function () {
       this.fetchTasks();
+    },
+    filters: {
+      pluralize: function (n) {
+        return n === 1 ? 'item' : 'items'
+      }
     },
     methods: {
       fetchTasks() {
@@ -113,8 +133,12 @@
       removeTask(task) {
         this.tasks.splice(this.tasks.indexOf(task), 1);
       },
+      removeCompleted() {
+        this.tasks = this.tasks.filter(function (task) {
+          return !task.completed;
+        });
+      },
       saveTasks() {
-        console.log(this.tasks)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
       }
     }
@@ -151,7 +175,11 @@
   }
 
   .todo-edit-input {
-    padding: 2px 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    box-shadow: none;
   }
 
   .todo-item-remove {
@@ -201,5 +229,24 @@
 
   .container {
     margin-top: 40px;
+  }
+
+  .todo-actions {
+    color: #666;
+  }
+  .todo-action-info {
+    font-size: 1rem;
+    vertical-align: middle;
+    font-weight: 400;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid transparent;
+    display: block;
+  }
+  .todo-add-input {
+    transition: all .6s ease-in-out;
+  }
+  .large {
+    font-size: 35px;
+    padding: .6rem 1.2rem;
   }
 </style>
