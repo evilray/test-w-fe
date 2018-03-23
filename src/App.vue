@@ -12,11 +12,13 @@
       </div>
       <ul class="todo-list">
         <li class="todo-item" v-for="task in tasks">
-          <input class="todo-checkbox" type="checkbox">
+          <input class="todo-checkbox" type="checkbox"
+                 v-model="task.completed">
           <label class="todo-item-title"
-
                  @click="editTask(task)">
-            <span v-if="task !== editingTask">{{task.title}}</span>
+            <span
+              :class="{completed: task.completed}"
+              v-if="task !== editingTask">{{task.title}}</span>
             <input class="todo-edit-input form-control" type="text"
                    v-focus
                    v-model="task.title"
@@ -105,17 +107,14 @@
         }
       },
       cancelEdit(task) {
-        this.editedTodo = null;
+        this.editingTask = null;
         task.title = this.beforeEditCache;
-      },
-      markTask(task) {
-
       },
       removeTask(task) {
         this.tasks.splice(this.tasks.indexOf(task), 1);
       },
       saveTasks() {
-        console.log('SAVED');
+        console.log(this.tasks)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
       }
     }
@@ -185,6 +184,11 @@
     outline: none;
     position: absolute;
     cursor: pointer;
+  }
+
+  .completed {
+    color: #CCC;
+    text-decoration: line-through;
   }
 
   .todo-checkbox:after {
