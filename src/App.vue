@@ -1,60 +1,110 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
+    <input class="form-control">
+    <ul class="todo-list">
+      <li class="todo-item" v-for="task in tasks">
+        <label class="todo-label">
+          <input class="todo-checkbox" type="checkbox"/>
+        </label>
+        {{task.title}}
+      </li>
     </ul>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'app',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
+  let task = {
+    id: null,
+    title: 'sd',
+    completed: false
+  };
+  const STORAGE_KEY = 'test-w-todo-list';
+  export default {
+    name: 'app',
+    data() {
+      return {
+        tasks: [],
+      }
+    },
+    computed: {
+      totalTasks() {
+        if (this.tasks) {
+          return this.tasks.length;
+        }
+      }
+    },
+    watch: {
+      tasks: {
+        handler: function () {
+          this.saveTasks()
+        },
+        deep: true
+      }
+    },
+    created: function () {
+      this.fetchTasks();
+    },
+    methods: {
+      fetchTasks() {
+        this.tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      },
+      addTask(task) {
+
+      },
+      sortTasks() {
+
+      },
+      editTask(task) {
+
+      },
+      markTask(task) {
+
+      },
+      removeTask(task) {
+
+      },
+      saveTasks() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
+      }
     }
   }
-}
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style scoped>
+  .todo-list, .todo-item {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
 
-h1, h2 {
-  font-weight: normal;
-}
+  .todo-list {
+    background: #FFF;
+  }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
+  .todo-item {
+    padding: 0 0 0 40px;
+    position: relative;
+    border-bottom: 1px solid #EEE;
+    line-height: 40px;
+  }
 
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
+  .todo-checkbox {
+    background: none;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 40px;
+    top: 0;
+    left: 0;
+    outline: none;
+    position: absolute;
+    cursor: pointer;
+  }
 
-a {
-  color: #42b983;
-}
+  .todo-checkbox:after {
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
+  }
+  .todo-checkbox:checked:after {
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
+  }
 </style>
